@@ -1,7 +1,7 @@
 open System.IO
 
 let root = __SOURCE_DIRECTORY__
-let arr = File.ReadAllLines(Path.Join(root, "/test"))
+let arr = File.ReadAllLines(Path.Join(root, "/input"))
 let lines = Array.toList(arr)
 
 let updateAti (index:int) (updFun:'a->'a) (list:'a list) : 'a list =
@@ -15,31 +15,31 @@ let updateAti (index:int) (updFun:'a->'a) (list:'a list) : 'a list =
 
 type Monkey = {
     id: int
-    items: int list
-    operation: int -> int
-    testDiv: int
+    items: int64 list
+    operation: int64 -> int64
+    testDiv: int64
     trueMonkey: int
     falseMonkey: int 
-    inspects: int
+    inspects: int64
 }
 
-let parseOp (line:string) : int->int =
+let parseOp (line:string) : int64->int64 =
     match line with
     | s when s.StartsWith("old + ") ->
-        let toAdd = s.Split(" + ")[1] |> int
+        let toAdd = s.Split(" + ")[1] |> int64
         fun i -> i + toAdd
     | s when s.StartsWith("old * old") ->
         fun i -> i * i
     | s when s.StartsWith("old *") -> 
         let x = s.Split(" * ")[1]
-        let toMulti = x |> int
+        let toMulti = x |> int64
         fun i -> i * toMulti
     | _ -> fun i -> i
 
 
 let parseMonkey (lines:string list) =
     let id = (lines[0].Split(" ")[1]).Split(":")[0] |> int
-    let items = (lines[1].Split(": ")[1]).Split(", ") |> Seq.map int |> Seq.toList
+    let items = (lines[1].Split(": ")[1]).Split(", ") |> Seq.map int64 |> Seq.toList
     let op = parseOp (lines[2].Split("= ")[1])
     let testDiv = int(lines[3].Split("by ")[1])
     let trueMonkey = int(lines[4].Split("monkey ")[1])
@@ -60,12 +60,12 @@ let monkeys =
     |> Seq.map parseMonkey 
     |> Seq.toList
 
-let inspectItem (monkey:Monkey) (item:int) : int =
+let inspectItem (monkey:Monkey) (item:int64) : int64 =
     let afterOp = monkey.operation item
-    let res = (afterOp % 96577) // % 9699690 //% 96577 // / 3
+    let res = (afterOp % int64(9699690)) //int64(96577)) // % 9699690 //% 96577 // / 3
     res
 
-let addItem (monkeys:Monkey list) (id:int) (item:int) : Monkey list =
+let addItem (monkeys:Monkey list) (id:int) (item:int64) : Monkey list =
     monkeys
         |> updateAti id (fun monkey ->
             { monkey with items = monkey.items@[item] })
@@ -75,7 +75,7 @@ let rec performMonkey (monkeys: Monkey list) (i:int) : Monkey list =
     match monkey.items with
     | item::rest ->
         let newItem = inspectItem monkey item
-        let afterInspect = monkeys |> updateAti i (fun m -> { m with inspects = m.inspects + 1})
+        let afterInspect = monkeys |> updateAti i (fun m -> { m with inspects = m.inspects + int64(1)})
 
         let toMonkey = if (newItem % monkey.testDiv) = 0 then monkey.trueMonkey else monkey.falseMonkey
         let afterAdd = addItem afterInspect toMonkey newItem
@@ -113,7 +113,7 @@ let resultOne = most * second
 let divs = monkeys |> List.map (fun m -> m.testDiv)
 let divSum = divs |> Seq.reduce (fun a b -> a * b)
 
-let after10000 = performRounds monkeys [1..20]
+let after10000 = performRounds monkeys [1..10000]
 let inspects2 = after10000 |> List.map (fun m -> m.inspects)
 let most2 = inspects2 |> List.max
 let second2 = inspects2  |> List.filter (fun r -> r <> most2) |> List.max
