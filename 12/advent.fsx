@@ -81,37 +81,35 @@ let rec iteration (map:Map) (state:State) : State =
 
 let initialState = { 
     steps = 0
-    positions = [start]
+    positions = if stepTWO then [goal] else [start]
 }
 
 map.[start |> fst , start |> snd] <- 'a'
 map.[goal |> fst, goal |> snd] <- 'z'
 
 let resultingState = iteration map initialState
-let resultOne = resultingState.steps
+let result = resultingState.steps
 
 // PART TWO
 // Oh why didnt i go backwards!?
 // I am..
-let newIntial = { initialState with positions = [goal] }
+// let newIntial = { initialState with positions = [goal] }
 
+// let rec findIndexes (map) (needle) (y,x) =
+//     let pos = findIndex map needle (y,x)
+//     match pos with
+//     | Some(p) ->
+//         printfn "%s" (p.ToString())
+//         let next = nextIndex (y,x)
+//         match next with
+//         | Some(n) -> p::findIndexes map needle n
+//         | None -> [p]
+//     | None -> []
 
+// let starts = findIndexes map 'a' (0,0) |> List.distinct
 
-let rec findIndexes (map) (needle) (y,x) =
-    let pos = findIndex map needle (y,x)
-    match pos with
-    | Some(p) ->
-        printfn "%s" (p.ToString())
-        let next = nextIndex (y,x)
-        match next with
-        | Some(n) -> p::findIndexes map needle n
-        | None -> [p]
-    | None -> []
-
-let starts = findIndexes map 'a' (0,0) |> List.distinct
-
-let resultTwo =
-    starts
-    |> List.map (fun s -> iteration map { initialState with positions = [s] })
-    |> List.map (fun s -> s.steps)
-    |> List.min
+// let resultTwo =
+//     starts
+//     |> List.map (fun s -> iteration map { initialState with positions = [s] })
+//     |> List.map (fun s -> s.steps)
+//     |> List.min
